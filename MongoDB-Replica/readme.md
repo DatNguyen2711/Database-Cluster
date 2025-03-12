@@ -3,7 +3,11 @@
 ![alt text](image.png)
 
 
+
+
 1. Chuẩn bị 3 server, ví dụ có 3 node:
+
+#### Chạy lệnh trên cả 3 node
 
 ```bash
 node1: 192.168.10.132
@@ -11,7 +15,7 @@ node2: 192.168.10.133
 node3: 192.168.10.134
 
 ```
-- Tiến hành add hosts vào các server (chạy lệnh trên cả 3 node)
+- Tiến hành add hosts vào các server 
 
 ```bash 
 sudo tee -a /etc/hosts <<EOF
