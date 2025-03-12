@@ -77,7 +77,7 @@ systemctl status mongod
 mongosh
 
 test> rs.initiate( {
-      _id : "mongodb-cluster-devopseduvn",
+      _id : "mongodb-cluster-lab",
       members: [
          { _id: 0, host: "mongodb-node-1:27017" }, # có thể thay = IP nếu chưa add hosts ở step 1
          { _id: 1, host: "mongodb-node-2:27017" },
