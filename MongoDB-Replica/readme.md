@@ -80,6 +80,7 @@ systemctl status mongod
 ```bash
 mongosh
 
+# copy lệnh duới chạy
 test> rs.initiate( {
       _id : "mongodb-cluster-lab",
       members: [
@@ -89,6 +90,9 @@ test> rs.initiate( {
       ]
    })
 
+```
+
+```bash
 
 mongodb-cluster-lab [direct: primary] test> rs.status() # chạy lệnh này để kiểm tra status của replica 
 
@@ -218,6 +222,10 @@ mongodb-cluster-lab [direct: primary] test> rs.status() # chạy lệnh này đ�
   },
   operationTime: Timestamp({ t: 1741773451, i: 1 })
 }
+
+```
+
+```bash
 mongodb-cluster-devopseduvn [direct: primary] test> rs.isMaster() # chạy để check xem node hiện tại có phải Primary hay ko
 
 
