@@ -1,11 +1,28 @@
-### Thêm ổ cứng vật lý để lưu data (chỉ cần trên node OSD)
+# Cài đặt Ceph cluster
+
+### Prerequiste 
+
+- 3 node for ceph-OSD and 3 node cho ceph-MON
+
+```golang
+ceph-mon-1 192.168.10.112   
+ceph-mon-2 192.168.10.113
+ceph-mon-3 192.168.10.114
+
+ceph-osd-1 192.168.10.115
+ceph-osd-2 192.168.10.116
+ceph-osd-3 192.168.10.117
+```
+
+> Có thể tạo 1 node riêng làm admin nhưng ở đây lấy luôn node ceph-mon-1 làm admin. Đảm bảo rằng node admin có thể ssh qua các node còn lại = user root ở port 22 
+**Thêm ổ cứng vật lý để lưu data (chỉ cần trên node OSD)**
 
 > Bảo thằng system cấp cho 1 ổ :)))) tên là sdb hoặc cái mẹ gì đó
 
 1. Cách thêm:
 
 ```bash 
-lsblk -l # xem danh sách các ổ hiện tại (nếu system đã thêm thì nó sẽ hieẻn thị)
+lsblk -l # xem danh sách các ổ hiện tại (nếu system đã thêm thì nó sẽ hiẻn thị)
 ________________________________________________________________
 
     NAME  MAJ:MIN RM  SIZE RO TYPE MOUNTPOINTS
@@ -85,5 +102,64 @@ sudo vi /etc/fstab
 
 ```
 
-
 ![alt text](image.png)
+
+
+### Cài đặt ceph
+
+2. Follow các bước sau:
+
+
+- Cài đặt python3 và docker trên tất cả các node
+
+- Cài đặt ceph admin
+```bash   
+apt install -y cephadm
+
+```
+- Khởi tạo ceph admin
+
+```bash
+
+cephadm bootstrap --mon-ip 192.168.10.112   
+
+
+```
+- Cài đặt ceph-cli
+
+```bash 
+
+cephadm add-repo --release reef
+cephadm install ceph-common
+
+```
+
+- Add các hosts còn lại vào cluster
+
+```bash 
+ceph orch host add datnd-ceph-mon-2 192.168.10.113
+ceph orch host add datnd-ceph-mon-3 192.168.10.114
+ceph orch host add datnd-ceph-osd-1 192.168.10.115
+ceph orch host add datnd-ceph-osd-2 192.168.10.116
+ceph orch host add datnd-ceph-osd-3 192.168.10.117
+```
+
+
+> Trường hợp add hosts mà báo lỗi sau:
+
+![alt text](image-1.png)
+
+**Chạy lệnh sau:**
+
+- Copy ssh key gen bởi ceph admin vào các node còn lại để có thể join vào cluster
+
+```bash
+sudo ssh-copy-id -f -i /etc/ceph/ceph.pub root@192.168.10.113 
+
+...
+
+sudo ssh-copy-id -f -i /etc/ceph/ceph.pub root@192.168.10.117
+```
+
+
+
