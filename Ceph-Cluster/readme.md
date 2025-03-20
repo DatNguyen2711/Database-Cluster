@@ -93,4 +93,89 @@ sudo ssh-copy-id -f -i /etc/ceph/ceph.pub root@192.168.10.117
 ```
 
 
+### Test provision k8s
 
+
+1.  Tải chart:
+
+```bash 
+kubectl create ns ceph
+
+helm repo add ceph-csi https://ceph.github.io/csi-charts
+
+helm pull ceph-csi/ceph-csi-cephfs
+
+```
+2. Lấy thông tin về cụm ceph:
+
+
+```bash
+
+ceph config generate-minimal-conf > ceph-minimal.conf
+
+cat ceph-minimal.conf
+__________________________________________________________________
+        # minimal ceph.conf for e70c696a-049c-11f0-aaf6-c1a94ea2f0e2
+        [global]
+                fsid = e70c696a-049c-11f0-aaf6-c1a94ea2f0e2
+                mon_host = [v2:192.168.10.112:3300/0,v1:192.168.10.112:6789/0] [v2:192.168.10.113:3300/0,v1:192.168.10.113:6789/0] [v2:192.168.10.114:3300/0,v1:192.168.10.114:6789/0]
+__________________________________________________________________
+
+ceph auth get-key client.admin
+
+QVFDWDNuVmtNV3NvSlJBQUFvazIxMCszZXFxNmF6SmpT5WJjaUE9PQ==
+
+```
+
+
+
+3. Tạo volume, subvolumegroup:
+
+```bash 
+# tạo volume có tên k8s-storage ở các node OSD
+ceph fs volume create k8s-storage --placement="3 datnd-ceph-osd-01 datnd-ceph-osd-02 datnd-ceph-osd-03"
+
+# tạo subvolume có tên csitrong volume k8s-storage
+
+ceph fs subvolume create k8s-storage csi 
+
+```
+
+4. Sửa các fields sau trong values.yaml :
+
+```bash
+
+csiConfig: 
+  - clusterID: e70c696a-049c-11f0-aaf6-c1a94ea2f0e2
+    monitors:
+      - 192.168.10.112:6789 # IP các node ceph-MON
+      - 192.168.10.113:6789
+      - 192.168.10.114:6789
+    cephFS:
+      subvolumeGroup: "csi" # tên subvolume
+___
+
+storageClass:
+  create: true
+  name: csi-cephfs-sc
+  clusterID: e70c696a-049c-11f0-aaf6-c1a94ea2f0e2 # đổi thành cluster id
+  fsName: k8s-storage # tên volume đã tạo ở trên
+
+___
+
+secret:
+  create: true
+  name: csi-cephfs-secret
+  annotations: {}
+  adminID: admin   
+  adminKey: AQB6gdpnLhE+DBAAd7V/LN7XiuoR6qKVsJfFrg==   # key vừa lấy ở trên
+  userID: ""
+  userKey: ""
+
+```
+
+5. Tải helm chart 
+
+```bash 
+helm install  ceph-csi -f values.yaml ceph-csi-cephfs -n ceph
+```
