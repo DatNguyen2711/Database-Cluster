@@ -32,7 +32,7 @@ ________________________________________________________________
     Partition type
     p   primary (0 primary, 0 extended, 4 free)
     e   extended (container for logical partitions)
-    Select (default p): e       # chọn e (extened) để tạo phân vùng mở rộng 
+    Select (default p): p       # chọn p (extened) để tạo phân vùng mới
     Partition number (1-4, default 1):    # nhấn enter để chọn số phân vùng mặc dịnh (1)
     First sector (2048-41943039, default 2048): # nhập sector bắt đầu của phân vùng. Mặc định là 2048.
     Last sector, +/-sectors or +/-size{K,M,G,T,P} (2048-41943039, default 41943039): # nhập sector cuối của phân vùng hoặc kích thước của phân vùng. Mặc định là 41943039, tức là sử dụng toàn bộ không gian trống trên ổ đĩa. > nhấn enter là xong
