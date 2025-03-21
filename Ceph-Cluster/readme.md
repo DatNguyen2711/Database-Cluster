@@ -32,8 +32,6 @@ sda1                                               8:1    0    1M  0 part
 sda2                                               8:2    0   20G  0 part /
 sdb                                                8:16   0   20G  0 disk 
 sr0                                               11:0    1    2G  0 rom  
-ceph--b688eee3--4a73--41c3--8216--e4a35a683f22-osd--block--03f20a06--049a--4b6a--9ee3--8869b749ec12
-                                                 253:0    0   20G  0 lvm  
 ```
 
 ### Cài đặt ceph
@@ -178,4 +176,55 @@ secret:
 
 ```bash 
 helm install  ceph-csi -f values.yaml ceph-csi-cephfs -n ceph
+```
+
+
+### Cài Đặt ceph rados gateway
+
+1. Lấy các node OSD chạy RGW service:
+
+```bash 
+ceph orch apply rgw default --placement="3 datnd-ceph-osd-1 datnd-ceph-osd-2 datnd-ceph-osd-3" --port=8080
+ceph orch host label add datnd-ceph-osd-1  rgw
+ceph orch host label add datnd-ceph-osd-2  rgw
+ceph orch host label add datnd-ceph-osd-3  rgw
+```
+
+2. Tạo rados gateway cho tren các node OSD
+
+```bash 
+ceph orch apply rgw foo '--placement=label:rgw count-per-host:3' --port=8000 # thay đổi số lượng các hosts rgw qua count tùy theo nhu cầu
+```
+
+
+3. Tạo bucket user
+```bash
+radosgw-admin user create --uid="admin" --display-name="RGW_Admin" > rgw_admin.ttx
+```
+
+
+4. Cài đặt awscli
+
+```bash
+apt install awscli -y 
+```
+
+5. Thử push file lên bucket
+
+```bash
+aws configure 
+# Tạo bucket
+aws --endpoint-url=http://datnd-ceph-osd-1:8080 s3 mb s3://ceph1 
+
+# Push object lên bucket
+aws --endpoint-url=http://192.168.10.115:8080 s3 cp /root/init.sql  s3://ceph1
+aws --endpoint-url=http://192.168.10.115:8080 s3 cp /root/rgw_admin.txt  s3://ceph1
+
+# Kiểm tra
+aws --endpoint-url=http://192.168.10.115:8080 s3 ls s3://ceph1
+
+____________________________________________
+
+2025-03-21 03:08:14    4611041 init.sql
+2025-03-21 03:03:23        880 rgw_admin.txt
 ```
