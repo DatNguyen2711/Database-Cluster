@@ -188,6 +188,18 @@ ceph orch apply rgw default --placement="3 datnd-ceph-osd-1 datnd-ceph-osd-2 dat
 ceph orch host label add datnd-ceph-osd-1  rgw
 ceph orch host label add datnd-ceph-osd-2  rgw
 ceph orch host label add datnd-ceph-osd-3  rgw
+ceph orch host ls
+
+Output______________________________________________
+
+HOST              ADDR            LABELS      STATUS  
+datnd-ceph-mon-1  192.168.10.112  _admin,mgr          
+datnd-ceph-mon-2  192.168.10.113  mon,mgr             
+datnd-ceph-mon-3  192.168.10.114  mon,mgr             
+datnd-ceph-osd-1  192.168.10.115  osd,rgw             
+datnd-ceph-osd-2  192.168.10.116  osd,rgw             
+datnd-ceph-osd-3  192.168.10.117  osd,rgw             
+6 hosts in cluster
 ```
 
 2. Tạo rados gateway cho tren các node OSD
@@ -200,6 +212,47 @@ ceph orch apply rgw foo '--placement=label:rgw count-per-host:3' --port=8000 # t
 3. Tạo bucket user
 ```bash
 radosgw-admin user create --uid="admin" --display-name="RGW_Admin" > rgw_admin.ttx
+
+Output______________________________________________
+
+{
+    "user_id": "admin",
+    "display_name": "RGW_Admin",
+    "email": "",
+    "suspended": 0,
+    "max_buckets": 1000,
+    "subusers": [],
+    "keys": [
+        {
+            "user": "admin",
+            "access_key": "6GJJGEVQ0EPF3DE62EKY",
+            "secret_key": "4UCRaPgWQGDRNwr8uXGJAg8zOIVimlNDVAedkCBV"
+        }
+    ],
+    "swift_keys": [],
+    "caps": [],
+    "op_mask": "read, write, delete",
+    "default_placement": "",
+    "default_storage_class": "",
+    "placement_tags": [],
+    "bucket_quota": {
+        "enabled": false,
+        "check_on_raw": false,
+        "max_size": -1,
+        "max_size_kb": 0,
+        "max_objects": -1
+    },
+    "user_quota": {
+        "enabled": false,
+        "check_on_raw": false,
+        "max_size": -1,
+        "max_size_kb": 0,
+        "max_objects": -1
+    },
+    "temp_url_keys": [],
+    "type": "rgw",
+    "mfa_ids": []
+}
 ```
 
 
@@ -223,7 +276,7 @@ aws --endpoint-url=http://192.168.10.115:8080 s3 cp /root/rgw_admin.txt  s3://ce
 # Kiểm tra
 aws --endpoint-url=http://192.168.10.115:8080 s3 ls s3://ceph1
 
-____________________________________________
+Output____________________________________________
 
 2025-03-21 03:08:14    4611041 init.sql
 2025-03-21 03:03:23        880 rgw_admin.txt
